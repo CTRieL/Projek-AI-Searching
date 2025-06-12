@@ -19,42 +19,24 @@
 	@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
 </style>
 
-<div class="container-sm fs-6" style="font-family: 'Poppins', sans-serif">
-	<h2 class="fs-4 fw-bold mt-5 mb-3">Berapa Ukuran Kosmu?</h2>
-	<form method="post" action="{{ url_for('input_furniture') }}">
-		<div class="mt-3 mb-1 row">
-			<label class="col-sm-2 col-form-label">Panjang</label>
-			<div class="col-sm-10">
-				<input
-					class="form-control"
-					name="kost_length"
-					type="number"
-					min="1"
-					max="10"
-					value="{{ kost_length }}"
-				/><br />
-			</div>
-		</div>
-		<div class="mb-3 row">
-			<label class="col-sm-2 col-form-label">Lebar</label>
-			<div class="col-sm-10">
-				<input
-					class="form-control"
-					name="kost_width"
-					type="number"
-					min="1"
-					max="10"
-					value="{{ kost_width }}"
-				/><br />
-			</div>
-		</div>
-		<span class="w-100 d-flex justify-content-end mb-2"
-			><button class="btn btn-primary px-3" type="submit">
-				Ubah Ukuran Kos
-			</button></span
-		>
-	</form>
-	<hr />
+<div class="container-sm fs-6" style='font-family: "Poppins", sans-serif;'>
+<h2 class="fs-4 fw-bold mt-5 mb-3">Berapa Ukuran Kosmu?</h2>
+<form method="post" action="{{ url_for('input_furniture') }}">
+    <div class="mt-3 mb-1 row">
+        <label class="col-sm-2 col-form-label">Panjang</label>
+        <div class="col-sm-10">     
+            <input class="form-control" name="kost_length" type="number" min="1"  value="{{ kost_length }}"><br>
+        </div>
+    </div>
+    <div class="mb-3 row">
+        <label class="col-sm-2 col-form-label">Lebar</label>
+        <div class="col-sm-10">     
+            <input class="form-control" name="kost_width" type="number" min="1" value="{{ kost_width }}"><br>
+        </div>
+    </div>
+    <span class="w-100 d-flex justify-content-end mb-2"><button class="btn btn-primary px-3" type="submit">Ubah Ukuran Kos</button></span>
+</form>
+<hr>
 
 	<div class="d-flex gap-5 mt-5">
 		<div class="w-100">
@@ -97,6 +79,25 @@
 			</form>
 		</div>
 
+<<<<<<< HEAD
+    <div class="w-100">
+    <h3 class="fs-4 fw-bold mb-3">Daftar Furnitur</h3>
+    {% if furnitures|length == 0 %}
+        <div class="text-secondary">Belum ada furnitur yang ditambahkan.</div>
+    {% else %}
+    <ol class="list-group list-group-flush d-flex flex-column gap-2">
+    {% for furn in furnitures %}
+        <li class="list-group-item d-flex w-100 align-items-center justify-content-between">
+            {{ furn['name'] }} ({{ furn['length'] }} x {{ furn['width'] }})
+            <form method="post" action="{{ url_for('delete_furniture', index=loop.index0) }}" style="display:inline">
+                <button class="btn btn-outline-danger btn-sm" type="submit">Hapus</button>
+            </form>
+        </li>
+    {% endfor %}
+    </ol>
+    {% endif %}
+    </div>
+=======
 		<div class="w-100">
 			<h3 class="fs-4 fw-bold mb-3">Daftar Furnitur</h3>
 			{% if furnitures|length == 0 %}
@@ -191,4 +192,5 @@
 			Reset Grid
 		</button>
 	</form>
+>>>>>>> d0d9c9eefeb2c160c55c693f10f5f03fdddc6887
 </div>
