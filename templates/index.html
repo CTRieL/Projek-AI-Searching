@@ -30,6 +30,7 @@
 					name="kost_length"
 					type="number"
 					min="1"
+					max="10"
 					value="{{ kost_length }}"
 				/><br />
 			</div>
@@ -42,6 +43,7 @@
 					name="kost_width"
 					type="number"
 					min="1"
+					max="10"
 					value="{{ kost_width }}"
 				/><br />
 			</div>
@@ -69,7 +71,7 @@
 				<br />
 				Panjang
 				<input
-					placeholder="Masukkan panjang dalam meter"
+					placeholder="Masukkan panjang"
 					autocomplete="off"
 					class="mt-2 form-control"
 					name="length"
@@ -79,7 +81,7 @@
 				<br />
 				Lebar
 				<input
-					placeholder="Masukkan lebar dalam meter"
+					placeholder="Masukkan lebar"
 					autocomplete="off"
 					class="mt-2 form-control"
 					name="width"
@@ -105,7 +107,7 @@
 				<li
 					class="list-group-item d-flex w-100 align-items-center justify-content-between"
 				>
-					{{ furn['name'] }} ({{ furn['length'] }}m x {{ furn['width'] }}m)
+					{{ furn['name'] }} ({{ furn['length'] }} x {{ furn['width'] }})
 					<form
 						method="post"
 						action="{{ url_for('delete_furniture', index=loop.index0) }}"
@@ -140,8 +142,7 @@
 
 	<h2 class="fs-4 fw-bold">Tata Letak Furnitur Kos</h2>
 	<div style="font-size: 13px; color: #555; margin-bottom: 6px">
-		<b>Grid scale:</b> 1 sel = {{ grid_scale }} cm &nbsp;|&nbsp; Grid size: {{
-		rows }} x {{ cols }}
+		Grid size: {{ rows }} x {{ cols }}
 	</div>
 	<table border="1" style="border-collapse: collapse">
 		{% set color_map = {} %} {% set color_palette =

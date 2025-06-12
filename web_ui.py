@@ -158,11 +158,11 @@ def input_furniture():
             length_val = request.form.get('length','')
             width_val  = request.form.get('width','')
             try:
-                fl = float(length_val) if length_val else 1.0
+                fl = int(length_val) if length_val else 1.0
             except:
                 fl = 1.0
             try:
-                fw = float(width_val) if width_val else 1.0
+                fw = int(width_val) if width_val else 1.0
             except:
                 fw = 1.0
             if name:
