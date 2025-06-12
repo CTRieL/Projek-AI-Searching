@@ -1,0 +1,84 @@
+<!doctype html>
+<title>Furnitur App</title>
+
+<h2>Input Kos</h2>
+<form method="post" action="{{ url_for('input_furniture') }}">
+    Ukuran Kos<br>
+    Panjang     <input name="kost_length" type="number" min="1"  value="{{ kost_length }}"><br>
+    Lebar       <input name="kost_width" type="number" min="1" value="{{ kost_width }}"><br>
+<hr>
+
+<h2>Input Furnitur</h2>
+    Nama:       <input name="name" value="" required> <br>
+    Panjang:    <input name="length" type="number" min="1"> <br>
+    Lebar:      <input name="width" type="number" min="1"> <br>
+    <button type="submit">Tambah</button>
+</form>
+
+<h3>Daftar Furnitur:</h3>
+<ul>
+{% for furn in furnitures %}
+    <li>
+        {{ furn['name'] }} ({{ furn['length'] }}m x {{ furn['width'] }}m)
+        <form method="post" action="{{ url_for('delete_furniture', index=loop.index0) }}" style="display:inline">
+            <button type="submit">Hapus</button>
+        </form>
+    </li>
+{% endfor %}
+</ul>
+
+<form method="post" action="{{ url_for('input_furniture') }}" style="margin-top:10px;">
+    <button type="submit" name="generate" value="1">Generate Tata Letak</button>
+</form>
+<hr>
+
+<h2>Tata Letak Furnitur Kos</h2>
+<div style="font-size:13px; color:#555; margin-bottom:6px;">
+    <b>Grid scale:</b> 1 sel = {{ grid_scale }} cm &nbsp;|&nbsp; Grid size: {{ rows }} x {{ cols }}
+</div>
+<table border=1 style="border-collapse:collapse;">
+{% set color_map = {} %}
+{% set color_palette = ['#b3e5fc','#ffe082','#c8e6c9','#f8bbd0','#fff9c4','#d1c4e9','#ffecb3','#b2dfdb','#f0f4c3','#f5f5f5','#e1bee7','#fce4ec','#e0f7fa','#f9fbe7','#f3e5f5','#e8f5e9','#fffde7','#fbe9e7','#e0f2f1','#f1f8e9'] %}
+{% for furn in furnitures %}
+    {% set _ = color_map.update({loop.index: color_palette[(loop.index0) % (color_palette|length)]}) %}
+{% endfor %}
+{% set center_map = {} %}
+{% for furn in furnitures %}
+    {% set id_val = loop.index %}
+    {% set cells = [] %}
+    {% for y in range(rows) %}
+        {% for x in range(cols) %}
+            {% if grid[y][x] == id_val %}
+                {% set _ = cells.append((y, x)) %}
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+    {% if cells %}
+        {% set cy = (cells|map(attribute=0)|sum) // (cells|length) %}
+        {% set cx = (cells|map(attribute=1)|sum) // (cells|length) %}
+        {% set _ = center_map.update({(cy, cx): id_val}) %}
+    {% endif %}
+{% endfor %}
+{% for y in range(rows) %}
+<tr>
+    {% for x in range(cols) %}
+    {% set cell = grid[y][x] %}
+    {% if cell and cell in color_map %}
+        <td width=50 height=50 align=center style="background:{{ color_map[cell] }}; font-size:12px; font-weight:bold; color:#333; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; max-width:50px;">
+            <div style="width:50px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">
+                {% if (y, x) in center_map and center_map[(y, x)] == cell %}
+                    {{ furnitures[cell-1]['name'] }}
+                {% endif %}
+            </div>
+        </td>
+    {% else %}
+        <td width=50 height=50 align=center style="background:white;"> </td>
+    {% endif %}
+    {% endfor %}
+</tr>
+{% endfor %}
+</table>
+<br>
+<form method="post" action="{{ url_for('reset') }}">
+    <button type="submit">Reset Grid</button>
+</form>
