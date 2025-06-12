@@ -1,4 +1,5 @@
 import math
+import uuid
 from flask import Flask, render_template, request, redirect, url_for, session
 from functools import reduce
 from generate import GenerateFurniturePosition
@@ -93,6 +94,7 @@ def compute_grid(kost_length, kost_width, furnitures, max_grid=10):
         fr = max(1, int(math.ceil(fl / cell_meter)))
         fc = max(1, int(math.ceil(fw / cell_meter)))
         furn_item = {
+            'id': f.get('id'),  # Pastikan id ikut diteruskan ke grid generator
             'name': f.get('name', ''),
             'length': fr,
             'width': fc,
@@ -165,6 +167,7 @@ def input_furniture():
                 fw = 1.0
             if name:
                 furn = {
+                    'id': uuid.uuid4().hex,  # Tambahkan id unik
                     'name': name,
                     'length': fl,
                     'width': fw,

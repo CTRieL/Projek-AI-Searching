@@ -139,7 +139,7 @@ class GenerateFurniturePosition:
         n, m = self.room_rows, self.room_cols
         count = 0
         for idx, furn in enumerate(self.furnitures):
-            id_val = idx + 1
+            id_val = furn['id'] if 'id' in furn else idx + 1
             mat = furn['matrix']
             f_rows, f_cols = len(mat), len(mat[0])
             # Sisi panjang
@@ -202,7 +202,9 @@ class GenerateFurniturePosition:
             for i in range(self.room_rows - f_rows + 1):
                 for j in range(self.room_cols - f_cols + 1):
                     if self.can_place(rot_matrix, i, j):
-                        self.place(rot_matrix, i, j, idx+1)
+                        # Gunakan id unik jika ada, jika tidak fallback ke idx+1
+                        value = furn['id'] if 'id' in furn else idx+1
+                        self.place(rot_matrix, i, j, value)
                         if self.furnitures_have_access():
                             self.brute_force(idx+1)
                         self.place(rot_matrix, i, j, 0)
