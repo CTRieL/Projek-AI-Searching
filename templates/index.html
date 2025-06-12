@@ -25,7 +25,7 @@
             <input class="form-control" name="kost_width" type="number" min="1" value="{{ kost_width }}"><br>
         </div>
     </div>
-    <span class="w-100 d-flex justify-content-end mb-2"><button class="btn btn-info px-3" type="submit">Ubah Ukuran Kos</button></span>
+    <span class="w-100 d-flex justify-content-end mb-2"><button class="btn btn-primary px-3" type="submit">Ubah Ukuran Kos</button></span>
 </form>
 <hr>
 
@@ -48,7 +48,7 @@
     <ol class="list-group list-group-flush d-flex flex-column gap-2">
     {% for furn in furnitures %}
         <li class="list-group-item d-flex w-100 align-items-center justify-content-between">
-            {{ furn['name'] }} ({{ furn['length'] }}m x {{ furn['width'] }}m)
+            {{ furn['name'] }} ({{ furn['length'] }} x {{ furn['width'] }})
             <form method="post" action="{{ url_for('delete_furniture', index=loop.index0) }}" style="display:inline">
                 <button class="btn btn-outline-danger btn-sm" type="submit">Hapus</button>
             </form>
