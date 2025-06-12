@@ -132,11 +132,11 @@ def input_furniture():
             width_val  = request.form.get('kost_width')
             # Simpan sebagai integer (atau float jika perlu)
             try:
-                kl = float(length_val) if length_val else 1.0
+                kl = int(length_val) if length_val else 1.0
             except:
                 kl = 1.0
             try:
-                kw = float(width_val) if width_val else 1.0
+                kw = int(width_val) if width_val else 1.0
             except:
                 kw = 1.0
             # Simpan ke session
