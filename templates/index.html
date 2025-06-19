@@ -142,6 +142,9 @@
 	<div style="font-size: 13px; color: #555; margin-bottom: 6px">
 		<b>Grid scale:</b> 1 sel = {{ grid_scale // 100 }} cm &nbsp;|&nbsp; Grid
 		size: {{ rows }} x {{ cols }}
+		{% if calc_time %}
+		&nbsp;|&nbsp; <b>Waktu hitung:</b> {{ calc_time }} detik
+		{% endif %}
 	</div>
 	<table border="1" style="border-collapse: collapse">
 		{% set color_map = {} %} {% set color_palette =

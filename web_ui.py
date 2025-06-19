@@ -1,5 +1,6 @@
 import math
 import uuid
+import time
 from flask import Flask, render_template, request, redirect, url_for, session
 from functools import reduce
 from generate import GenerateFurniturePosition
@@ -186,20 +187,20 @@ def input_furniture():
             kw = session['kost_width']
             furnitures = session['furnitures']
             rows, cols, cell_meter, furn_grid = compute_grid(kl, kw, furnitures, max_grid=10)
-            # Simpan rows, cols, dan skala grid
             session['rows'] = rows
             session['cols'] = cols
-            # grid_scale dalam cm: cell_meter (m) * 100
             try:
                 session['grid_scale'] = int(round(cell_meter * 100))
             except:
                 session['grid_scale'] = cell_meter * 100
-            # Generate layout
+            # Mulai timing
+            t0 = time.time()
             gen = GenerateFurniturePosition(rows, cols, furn_grid)
             results, results_scores = gen.generate()
+            t1 = time.time()
+            session['calc_time'] = '{:.3f}'.format(t1-t0)
             if results:
                 session['grid'] = results[0]
-                # Hitung skor untuk layout terpilih
                 area_calc = AreaCalculator()
                 scoring = area_calc.score_layout(session['grid'], furn_grid, gen.count_filled_sides)
                 session['scoring'] = scoring
