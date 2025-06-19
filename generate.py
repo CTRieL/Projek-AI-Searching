@@ -172,7 +172,7 @@ class GenerateFurniturePosition:
         if idx == 0:
             self.sort_furnitures()
             self.room = [[0]*self.room_cols for _ in range(self.room_rows)]
-            self.best_score = -1
+            self.best_scores = []  # List of (score, grid, scoring_tuple)
             self.placements = []
         area_kosong = sum(cell == 0 for row in self.room for cell in row)
         luas_sisa = self.total_luas_furnitur_sisa(idx)
@@ -181,18 +181,20 @@ class GenerateFurniturePosition:
         matrix_snapshot = [row[:] for row in self.room]
         # Hitung score kombinasi saat ini
         score_tuple = self.area_calc.score_layout(matrix_snapshot, self.furnitures, self.count_filled_sides)
-        # Pastikan tuple memiliki minimal 5 elemen (isi 0 jika kurang)
-        score_tuple = tuple(list(score_tuple) + [0]*(5-len(score_tuple)))
-        score, area_score, side_score, long_side_score, max_area = score_tuple[:5]
-        # Prune jika score saat ini < best_score
-        if score < self.best_score:
-            return
+        # Pastikan tuple memiliki minimal 6 elemen (isi 0 jika kurang)
+        score_tuple = tuple(list(score_tuple) + [0]*(6-len(score_tuple)))
+        score, area_score, side_score, long_side_score, max_area, corner_score = score_tuple[:6]
+        # Prune jika skor saat ini < skor tertinggi ke-3
+        if len(self.best_scores) >= 3:
+            min_top3 = min(s for s, _, _ in self.best_scores)
+            if score < min_top3:
+                return
         if idx == len(self.furnitures):
-            if score > self.best_score:
-                self.best_score = score
-                self.placements = [[row[:] for row in self.room]]
-            elif score == self.best_score:
-                self.placements.append([row[:] for row in self.room])
+            # Simpan grid jika skor masuk 3 besar
+            self.best_scores.append((score, [row[:] for row in self.room], score_tuple))
+            self.best_scores = sorted(self.best_scores, key=lambda x: -x[0])[:3]
+            self.placements = [g for _, g, _ in self.best_scores]
+            self.placement_scores = [sc for _, _, sc in self.best_scores]
             return
         furn = self.furnitures[idx]
         for rot_matrix in self.get_unique_rotations(furn['matrix']):
@@ -209,5 +211,7 @@ class GenerateFurniturePosition:
 
     def generate(self):
         self.placements = []
+        self.best_scores = []
+        self.placement_scores = []
         self.brute_force()
-        return self.placements
+        return self.placements, self.placement_scores

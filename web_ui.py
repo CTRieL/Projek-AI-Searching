@@ -123,6 +123,8 @@ def input_furniture():
     if 'grid_scale' not in session:
         session['grid_scale'] = 100  # default 1 sel = 100 cm (1m)
 
+    best_alternatives = []
+    best_alternatives_scores = []
     if request.method == 'POST':
         # 1. Cek input ukuran kos (form input kos) tanpa furnitur
         if 'kost_length' in request.form and 'kost_width' in request.form \
@@ -194,21 +196,37 @@ def input_furniture():
                 session['grid_scale'] = cell_meter * 100
             # Generate layout
             gen = GenerateFurniturePosition(rows, cols, furn_grid)
-            results = gen.generate()
+            results, results_scores = gen.generate()
             if results:
-                # Pilih layout terbaik: di kode lama, kamu bandingkan max_area; di sini kita simpan yang pertama
                 session['grid'] = results[0]
+                # Hitung skor untuk layout terpilih
+                area_calc = AreaCalculator()
+                scoring = area_calc.score_layout(session['grid'], furn_grid, gen.count_filled_sides)
+                session['scoring'] = scoring
+                best_alternatives = results[1:4] if len(results) > 1 else []
+                best_alternatives_scores = results_scores[1:4] if len(results_scores) > 1 else []
             else:
                 session['grid'] = [[0 for _ in range(cols)] for _ in range(rows)]
+                session['scoring'] = None
+                best_alternatives = []
+                best_alternatives_scores = []
         else:
             # Tanpa furnitur: reset grid sesuai ukuran kos (meter dibulatkan)
             session['rows'] = int(max(1, round(session['kost_length'])))
             session['cols'] = int(max(1, round(session['kost_width'])))
             session['grid'] = [[0 for _ in range(session['cols'])] for _ in range(session['rows'])]
             session['grid_scale'] = 100
+            session['scoring'] = None
+            best_alternatives = []
+            best_alternatives_scores = []
+        session['best_alternatives'] = best_alternatives
+        session['best_alternatives_scores'] = best_alternatives_scores
         return redirect(url_for('input_furniture'))
 
     # GET: render template, pakai rows, cols dari session
+    best_alternatives = session.get('best_alternatives', [])
+    best_alternatives_scores = session.get('best_alternatives_scores', [])
+    best_alternatives_zipped = list(zip(best_alternatives, best_alternatives_scores))
     return render_template('index.html',
                            furnitures=session.get('furnitures', []),
                            grid=session.get('grid', [[0]*session.get('cols',6) for _ in range(session.get('rows',6))]),
@@ -216,7 +234,11 @@ def input_furniture():
                            cols=int(session.get('cols',6)),
                            kost_length=session.get('kost_length',300),
                            kost_width=session.get('kost_width',300),
-                           grid_scale=session.get('grid_scale',100))
+                           grid_scale=session.get('grid_scale',100),
+                           scoring=session.get('scoring', None),
+                           best_alternatives_zipped=best_alternatives_zipped,
+                           calc_time=session.get('calc_time', None)
+    )
 
 
 @app.route('/reset', methods=['POST'])
@@ -228,6 +250,7 @@ def reset():
     session['cols'] = 5
     session['grid_scale'] = 100
     session['grid'] = [[0]*5 for _ in range(5)]
+    session['scoring'] = None
     return redirect(url_for('input_furniture'))
 
 @app.route('/delete_furniture/<int:index>', methods=['POST'])

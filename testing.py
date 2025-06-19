@@ -89,8 +89,13 @@ class AreaCalculator:
         n = len(matrix)
         m = len(matrix[0])
         # Area kosong terbesar
-        bin_matrix = np.where(np.array(matrix)==0, 1, 0)
+        import numpy as np
+        print('DEBUG matrix:', matrix)
+        # Konversi ke binary: 1=empty, 0=furniture (apapun tipe id-nya)
+        bin_matrix = np.array([[1 if cell == 0 else 0 for cell in row] for row in matrix])
+        print('DEBUG bin_matrix:', bin_matrix)
         max_area = self.maxArea(bin_matrix)
+        print('DEBUG max_area:', max_area)
         area_score = max_area / (n * m) if n * m > 0 else 0
         # Skor sisi
         filled_sides = count_filled_sides_func(matrix)
@@ -140,8 +145,5 @@ class AreaCalculator:
                 corners_filled += 1
         corner_score = 1 if corners_filled == 4 else 0
         
-        score =(0.1 * area_score + 
-                0.3 * side_score + 
-                0.3 * corner_score + 
-                0.3 * long_side_score)
+        score = area_score + 0.2 * side_score + 0.2 * corner_score + 0.2 * long_side_score
         return score, area_score, side_score, long_side_score, max_area, corner_score

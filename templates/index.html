@@ -190,9 +190,136 @@
 		{% endfor %}
 	</table>
 	<br />
-	<form method="post" action="{{ url_for('reset') }}">
-		<button class="btn btn-outline-secondary mb-5" type="submit">
-			Reset Grid
-		</button>
-	</form>
+	{% if scoring %}
+    <div class="mt-3 mb-4 p-3 border rounded bg-light">
+        <b>Parameter Skoring Tata Letak:</b><br>
+        <ul class="mb-0" style="font-size:13px; color:#555;">
+            <li><b>Total Skor:</b> {{ '%.3f' % scoring[0] }}</li>
+            <li><span>Area: {{ '%.3f' % scoring[1] }}, Side: {{ '%.3f' % scoring[2] }}, Long: {{ '%.3f' % scoring[3] }}, MaxArea: {{ scoring[4] }}
+            <button id="show-empty-area-btn" type="button" class="btn btn-sm btn-outline-danger ms-2" style="font-size:11px; padding:0 6px 0 6px; line-height:1.2;">Tampilkan Area Kosong</button>
+            </span></li>
+            <li><span>Corner: {{ '%.3f' % scoring[5] }}</span></li>
+        </ul>
+    </div>
+    <script>
+    // Fungsi untuk mencari persegi panjang kosong terbesar di grid
+    function findLargestEmptyRectangle(grid) {
+        // grid: 2D array (string/number/null), kosong jika '' atau 0/null
+        var rows = grid.length;
+        var cols = grid[0].length;
+        var bin = [];
+        for(var y=0; y<rows; y++) {
+            bin[y] = [];
+            for(var x=0; x<cols; x++) {
+                bin[y][x] = (grid[y][x] === '' || grid[y][x] === 0 || grid[y][x] === null) ? 1 : 0;
+            }
+        }
+        // Algoritma Largest Rectangle in Histogram untuk tiap baris
+        var maxArea = 0, maxRect = null;
+        var height = Array(cols).fill(0);
+        for(var y=0; y<rows; y++) {
+            for(var x=0; x<cols; x++) {
+                height[x] = bin[y][x] ? height[x]+1 : 0;
+            }
+            // Cari largest rectangle di histogram height
+            var stack = [], x=0;
+            while(x<=cols) {
+                var h = (x<cols) ? height[x] : 0;
+                if(stack.length===0 || h >= height[stack[stack.length-1]]) {
+                    stack.push(x++);
+                } else {
+                    var tp = stack.pop();
+                    var w = stack.length===0 ? x : x-stack[stack.length-1]-1;
+                    var area = height[tp]*w;
+                    if(area > maxArea) {
+                        maxArea = area;
+                        maxRect = {y2:y, y1:y-height[tp]+1, x2:x-1, x1:x-w};
+                    }
+                }
+            }
+        }
+        return maxRect;
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        var btn = document.getElementById('show-empty-area-btn');
+        var highlighted = false;
+        if(btn) {
+            btn.addEventListener('click', function() {
+                var table = document.querySelector('table[border="1"]');
+                if(!table) return;
+                // Ambil grid dari tabel
+                var grid = [];
+                Array.from(table.rows).forEach(function(tr){
+                    var row = [];
+                    Array.from(tr.cells).forEach(function(td){
+                        // Kosong jika tidak ada innerText dan background putih
+                        row.push((td.innerText.trim()==='' && td.style.background==='' || td.style.background==='white') ? '' : 'X');
+                    });
+                    grid.push(row);
+                });
+                // Toggle highlight
+                if(highlighted) {
+                    Array.from(table.querySelectorAll('td.largest-empty')).forEach(function(td){
+                        td.classList.remove('largest-empty');
+                        td.style.background = '';
+                    });
+                    highlighted = false;
+                    return;
+                }
+                // Hapus highlight sebelumnya
+                Array.from(table.querySelectorAll('td.largest-empty')).forEach(function(td){
+                    td.classList.remove('largest-empty');
+                    td.style.background = '';
+                });
+                // Cari persegi panjang kosong terbesar
+                var rect = findLargestEmptyRectangle(grid);
+                if(rect) {
+                    for(var y=rect.y1; y<=rect.y2; y++) {
+                        for(var x=rect.x1; x<=rect.x2; x++) {
+                            var td = table.rows[y].cells[x];
+                            td.classList.add('largest-empty');
+                            td.style.background = 'rgba(255,0,0,0.08)';
+                        }
+                    }
+                    highlighted = true;
+                }
+            });
+        }
+    });
+    </script>
+    {% endif %}
+    {% if best_alternatives_zipped and best_alternatives_zipped|length > 0 %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <b>Kombinasi Tata Letak Alternatif Terbaik:</b>
+        </div>
+        {% for alt_grid, alt_score in best_alternatives_zipped %}
+        <div class="col-md-4 col-12 mt-3">
+            <table border="1" style="border-collapse: collapse; margin-bottom: 4px;">
+                {% for y in range(rows) %}
+                <tr>
+                    {% for x in range(cols) %}
+                    {% set cell = alt_grid[y][x] %}
+                    {% if cell and (cell in color_map) and (cell in furn_map) %}
+                    <td width="30" height="30" style="background:{{ color_map[cell] }}; border:1px solid #888"></td>
+                    {% else %}
+                    <td width="30" height="30" style="background:white; border:1px solid #888"></td>
+                    {% endif %}
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </table>
+            <div style="font-size:13px; color:#555;">
+                <b>Skor:</b> {{ '%.3f' % alt_score[0] }}<br>
+                <span>Area: {{ '%.3f' % alt_score[1] }}, Side: {{ '%.3f' % alt_score[2] }}, Long: {{ '%.3f' % alt_score[3] }}, MaxArea: {{ alt_score[4] }}, Corner: {{ '%.3f' % alt_score[5] }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <form method="post" action="{{ url_for('reset') }}">
+        <button class="btn btn-outline-secondary mb-5" type="submit">
+            Reset Grid
+        </button>
+    </form>
 </div>
