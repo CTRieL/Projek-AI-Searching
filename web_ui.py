@@ -228,11 +228,24 @@ def input_furniture():
     best_alternatives = session.get('best_alternatives', [])
     best_alternatives_scores = session.get('best_alternatives_scores', [])
     best_alternatives_zipped = list(zip(best_alternatives, best_alternatives_scores))
+    # Pastikan grid selalu [rows][cols]
+    grid = session.get('grid', [[0]*session.get('cols',6) for _ in range(session.get('rows',6))])
+    rows = int(session.get('rows',6))
+    cols = int(session.get('cols',6))
+    fixed_grid = []
+    for row in grid:
+        if len(row) < cols:
+            fixed_grid.append(row + [0]*(cols-len(row)))
+        else:
+            fixed_grid.append(row[:cols])
+    while len(fixed_grid) < rows:
+        fixed_grid.append([0]*cols)
+    fixed_grid = fixed_grid[:rows]
     return render_template('index.html',
                            furnitures=session.get('furnitures', []),
-                           grid=session.get('grid', [[0]*session.get('cols',6) for _ in range(session.get('rows',6))]),
-                           rows=int(session.get('rows',6)),
-                           cols=int(session.get('cols',6)),
+                           grid=fixed_grid,
+                           rows=rows,
+                           cols=cols,
                            kost_length=session.get('kost_length',300),
                            kost_width=session.get('kost_width',300),
                            grid_scale=session.get('grid_scale',100),
@@ -260,25 +273,48 @@ def delete_furniture(index):
         session['furnitures'].pop(index)
         session.modified = True
         furnitures = session.get('furnitures', [])
+        best_alternatives = []
+        best_alternatives_scores = []
         if furnitures:
             kl = session['kost_length']
             kw = session['kost_width']
             rows, cols, cell_meter, furn_grid = compute_grid(kl, kw, furnitures, max_grid=10)
             session['rows'] = rows
             session['cols'] = cols
-            session['grid_scale'] = int(round(cell_meter*100))
+            try:
+                session['grid_scale'] = int(round(cell_meter*100))
+            except:
+                session['grid_scale'] = cell_meter*100
+            import time
+            t0 = time.time()
             gen = GenerateFurniturePosition(rows, cols, furn_grid)
-            results = gen.generate()
+            results, results_scores = gen.generate()
+            t1 = time.time()
+            session['calc_time'] = '{:.3f}'.format(t1-t0)
             if results:
                 session['grid'] = results[0]
+                area_calc = AreaCalculator()
+                scoring = area_calc.score_layout(session['grid'], furn_grid, gen.count_filled_sides)
+                session['scoring'] = scoring
+                best_alternatives = results[1:4] if len(results) > 1 else []
+                best_alternatives_scores = results_scores[1:4] if len(results_scores) > 1 else []
             else:
                 session['grid'] = [[0]*cols for _ in range(rows)]
+                session['scoring'] = None
+                best_alternatives = []
+                best_alternatives_scores = []
         else:
             # Tidak ada furnitur: reset grid meter-bulat
             session['rows'] = int(max(1, round(session['kost_length'])))
             session['cols'] = int(max(1, round(session['kost_width'])))
             session['grid'] = [[0]*session['cols'] for _ in range(session['rows'])]
             session['grid_scale'] = 100
+            session['scoring'] = None
+            session['calc_time'] = None
+            best_alternatives = []
+            best_alternatives_scores = []
+        session['best_alternatives'] = best_alternatives
+        session['best_alternatives_scores'] = best_alternatives_scores
     return redirect(url_for('input_furniture'))
 
 

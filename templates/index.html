@@ -161,8 +161,7 @@
 		center_map.update({(cy, cx): id_val}) %} {% endif %} {% endfor %} {% for y
 		in range(rows) %}
 		<tr>
-			{% for x in range(cols) %} {% set cell = grid[y][x] %} {% if cell and
-			(cell in color_map) and (cell in furn_map) %}
+			{% for x in range(cols) %} {% set cell = grid[y][x] %} {% if cell and (cell is string or cell is number) and (cell in color_map) and (cell in furn_map) %}
 			<td
 				width="50"
 				height="50"
