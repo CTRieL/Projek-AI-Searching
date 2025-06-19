@@ -197,7 +197,7 @@ def input_furniture():
             t0 = time.time()
             gen = GenerateFurniturePosition(rows, cols, furn_grid)
             results, results_scores = gen.generate()
-            t1 = time.
+            t1 = time.time()
             session['calc_time'] = '{:.3f}'.format(t1-t0)
             if results:
                 session['grid'] = results[0]

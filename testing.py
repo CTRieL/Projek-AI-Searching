@@ -105,7 +105,7 @@ class AreaCalculator:
         # Skor bonus sisi panjang menyentuh dinding
         long_side_touch = 0
         for idx, furn in enumerate(furnitures):
-            id_val = furn['id']  # Gunakan id unik furnitur, bukan idx+1
+            id_val = idx + 1
             mat = furn['matrix']
             f_rows, f_cols = len(mat), len(mat[0])
             if f_rows == f_cols:
