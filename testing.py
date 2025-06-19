@@ -93,9 +93,7 @@ class AreaCalculator:
         print('DEBUG matrix:', matrix)
         # Konversi ke binary: 1=empty, 0=furniture (apapun tipe id-nya)
         bin_matrix = np.array([[1 if cell == 0 else 0 for cell in row] for row in matrix])
-        print('DEBUG bin_matrix:', bin_matrix)
         max_area = self.maxArea(bin_matrix)
-        print('DEBUG max_area:', max_area)
         area_score = max_area / (n * m) if n * m > 0 else 0
         # Skor sisi
         filled_sides = count_filled_sides_func(matrix)
@@ -132,7 +130,7 @@ class AreaCalculator:
         long_side_score = long_side_touch / len(furnitures) if furnitures else 0
         bonus_long_side = long_side_touch * 2  # 2 poin per furnitur yang sisi panjangnya menempel dinding
 
-        # Skor sudut: cek apakah keempat sudut terisi (bukan 0)
+        # Skor sudut: cek apakah tiga dari empat sudut terisi (bukan 0)
         corners_filled = 0
         if n > 0 and m > 0:
             if matrix[0][0] != 0:
@@ -143,7 +141,13 @@ class AreaCalculator:
                 corners_filled += 1
             if matrix[n-1][m-1] != 0:
                 corners_filled += 1
-        corner_score = 1 if corners_filled == 4 else 0
+        # Skor sudut hanya diberikan jika minimal 3 sudut terisi
+        corner_score = 1 if corners_filled >= 3 else 0
         
-        score = area_score + 0.2 * side_score + 0.2 * corner_score + 0.2 * long_side_score
+        score = (
+            area_score + 
+            0.1 * side_score + 
+            0.1 * corner_score + 
+            0.1 * long_side_score
+        )
         return score, area_score, side_score, long_side_score, max_area, corner_score
