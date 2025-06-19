@@ -94,10 +94,11 @@ class AreaCalculator:
         area_score = max_area / (n * m) if n * m > 0 else 0
         # Skor sisi
         filled_sides = count_filled_sides_func(matrix)
-        if filled_sides == 4:
+        if filled_sides > 4:
             side_score = 0
         else:
-            side_score = filled_sides / 3 if filled_sides > 0 else 0
+            side_score = filled_sides / 4 if filled_sides > 0 else 0
+            
         # Skor bonus sisi panjang menyentuh dinding
         long_side_touch = 0
         for idx, furn in enumerate(furnitures):
@@ -124,5 +125,23 @@ class AreaCalculator:
             if touches:
                 long_side_touch += 1
         long_side_score = long_side_touch / len(furnitures) if furnitures else 0
-        score = 0.1 * area_score + 0.4 * side_score + 0.5 * long_side_score
-        return score, area_score, side_score, long_side_score, max_area
+        bonus_long_side = long_side_touch * 2  # 2 poin per furnitur yang sisi panjangnya menempel dinding
+
+        # Skor sudut: cek apakah keempat sudut terisi (bukan 0)
+        corners_filled = 0
+        if n > 0 and m > 0:
+            if matrix[0][0] != 0:
+                corners_filled += 1
+            if matrix[0][m-1] != 0:
+                corners_filled += 1
+            if matrix[n-1][0] != 0:
+                corners_filled += 1
+            if matrix[n-1][m-1] != 0:
+                corners_filled += 1
+        corner_score = 1 if corners_filled == 4 else 0
+        
+        score =(0.1 * area_score + 
+                0.3 * side_score + 
+                0.3 * corner_score + 
+                0.3 * long_side_score)
+        return score, area_score, side_score, long_side_score, max_area, corner_score

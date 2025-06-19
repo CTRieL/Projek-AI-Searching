@@ -181,11 +181,9 @@ class GenerateFurniturePosition:
         matrix_snapshot = [row[:] for row in self.room]
         # Hitung score kombinasi saat ini
         score_tuple = self.area_calc.score_layout(matrix_snapshot, self.furnitures, self.count_filled_sides)
-        if len(score_tuple) == 5:
-            score, area_score, side_score, long_side_score, max_area = score_tuple
-        else:
-            score, area_score, side_score, long_side_score = score_tuple
-            max_area = 0
+        # Pastikan tuple memiliki minimal 5 elemen (isi 0 jika kurang)
+        score_tuple = tuple(list(score_tuple) + [0]*(5-len(score_tuple)))
+        score, area_score, side_score, long_side_score, max_area = score_tuple[:5]
         # Prune jika score saat ini < best_score
         if score < self.best_score:
             return

@@ -8,7 +8,7 @@ from testing import AreaCalculator
 app = Flask(__name__)
 app.secret_key = 'furnitur_secret_key'
 
-def compute_grid(kost_length, kost_width, furnitures, max_grid=10):
+def compute_grid(kost_length, kost_width, furnitures, max_grid=8):
     """
     kost_length, kost_width: ukuran kos dalam meter (int atau float, tapi di sini diasumsikan int atau float yang mewakili meter utuh atau desimal).
     furnitures: list of dict, setiap dict punya 'length' dan 'width' dalam meter (angka int atau float).
@@ -110,9 +110,9 @@ def input_furniture():
         
     # default kos: bisa sebagai integer meter
     if 'kost_length' not in session or not session.get('kost_length'):
-        session['kost_length'] = 5
+        session['kost_length'] = 300
     if 'kost_width' not in session or not session.get('kost_width'):
-        session['kost_width'] = 5
+        session['kost_width'] = 300
     # default grid & ukuran terakhir
     if 'rows' not in session or 'cols' not in session:
         # awalnya grid sesuai ukuran kos default
@@ -158,11 +158,11 @@ def input_furniture():
             length_val = request.form.get('length','')
             width_val  = request.form.get('width','')
             try:
-                fl = int(length_val) if length_val else 1.0
+                fl = float(length_val) if length_val else 1.0
             except:
                 fl = 1.0
             try:
-                fw = int(width_val) if width_val else 1.0
+                fw = float(width_val) if width_val else 1.0
             except:
                 fw = 1.0
             if name:
@@ -211,19 +211,19 @@ def input_furniture():
     # GET: render template, pakai rows, cols dari session
     return render_template('index.html',
                            furnitures=session.get('furnitures', []),
-                           grid=session.get('grid', [[0]*session.get('cols',10) for _ in range(session.get('rows',10))]),
-                           rows=int(session.get('rows',10)),
-                           cols=int(session.get('cols',10)),
-                           kost_length=session.get('kost_length',5),
-                           kost_width=session.get('kost_width',5),
+                           grid=session.get('grid', [[0]*session.get('cols',6) for _ in range(session.get('rows',6))]),
+                           rows=int(session.get('rows',6)),
+                           cols=int(session.get('cols',6)),
+                           kost_length=session.get('kost_length',300),
+                           kost_width=session.get('kost_width',300),
                            grid_scale=session.get('grid_scale',100))
 
 
 @app.route('/reset', methods=['POST'])
 def reset():
     session['furnitures'] = []
-    session['kost_length'] = 5
-    session['kost_width'] = 5
+    session['kost_length'] = 300
+    session['kost_width'] = 300
     session['rows'] = 5
     session['cols'] = 5
     session['grid_scale'] = 100
